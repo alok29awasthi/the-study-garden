@@ -5,7 +5,7 @@ const Contact = () => {
   // Replace with actual contact details
   const whatsappNumber = "919999999999"; // Format: country code + number (no spaces or symbols)
   const phoneNumber = "+91 99999 99999";
-  const email = "didi.tuition@example.com";
+  const email = "thestudygarden@gmail.com";
   const address = "123 Learning Street, Education City, State - 123456";
   
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=Hello! I'm interested in your tuition classes.`;

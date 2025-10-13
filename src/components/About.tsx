@@ -24,7 +24,7 @@ const About = () => {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12 md:mb-16 animate-fade-in">
           <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
-            About Didi's Tuition Classes
+            About The Study Garden
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
             Where learning meets excellence and every student's potential is unlocked
@@ -56,7 +56,7 @@ const About = () => {
 
         <div className="bg-gradient-card rounded-3xl p-8 md:p-12 shadow-soft animate-fade-in">
           <p className="text-lg text-foreground leading-relaxed text-center md:text-left">
-            At <strong className="text-primary">Didi's Tuition Classes</strong>, we believe that every child has the potential to excel. 
+            At <strong className="text-primary">The Study Garden</strong>, we believe that every child has the potential to excel. 
             With a passion for teaching and years of experience, I provide comprehensive tuition for students from 
             <strong className="text-secondary"> Classes 1 to 10</strong> across all subjects. My teaching approach combines 
             clarity, patience, and interactive methods to ensure students not only understand concepts but also develop 

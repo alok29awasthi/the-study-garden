@@ -21,11 +21,11 @@ const Hero = () => {
             </div>
             
             <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 leading-tight">
-              Didi's Tuition Classes
+              The Study Garden
             </h1>
             
             <p className="text-xl md:text-2xl text-primary-foreground/90 mb-4 font-light">
-              Learn with Joy, Learn with Didi!
+              Learn with Joy, Learn with Me!
             </p>
             
             <p className="text-lg text-primary-foreground/80 mb-8 max-w-lg mx-auto md:mx-0">

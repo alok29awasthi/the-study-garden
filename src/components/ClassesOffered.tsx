@@ -1,17 +1,30 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import { GraduationCap } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 const ClassesOffered = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (location.state?.scrollTo === "classes" && sectionRef.current) {
+      // scroll smoothly to this section
+      sectionRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [location]);
+
   const classes = [
-    { class: "Class 1", subjects: ["Math", "English", "EVS", "Hindi"] },
-    { class: "Class 2", subjects: ["Math", "English", "EVS", "Hindi"] },
-    { class: "Class 3", subjects: ["Math", "English", "EVS", "Hindi"] },
-    { class: "Class 4", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
-    { class: "Class 5", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
-    { class: "Class 6", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
-    { class: "Class 7", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
-    { class: "Class 8", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
-    { class: "Class 9", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
-    { class: "Class 10", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
+    { class: "1", subjects: ["Math", "English", "EVS", "Hindi"] },
+    { class: "2", subjects: ["Math", "English", "EVS", "Hindi"] },
+    { class: "3", subjects: ["Math", "English", "EVS", "Hindi"] },
+    { class: "4", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
+    { class: "5", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
+    { class: "6", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
+    { class: "7", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
+    { class: "8", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
+    { class: "9", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
+    { class: "10", subjects: ["Math", "English", "Science", "Social Studies", "Hindi"] },
   ];
 
   const gradientClasses = [
@@ -22,9 +35,9 @@ const ClassesOffered = () => {
   ];
 
   return (
-    <section className="py-16 px-4 md:py-24 bg-background">
+    <section ref={sectionRef} id="classes-offered" className="py-16 px-4 md:py-24 bg-background">
       <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-12 md:mb-16 animate-fade-in">
+        <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
             Interactive Tuition for Classes 1–10
           </h2>
@@ -37,21 +50,20 @@ const ClassesOffered = () => {
           {classes.map((item, index) => (
             <div
               key={index}
-              className={`${gradientClasses[index % gradientClasses.length]} rounded-2xl p-6 shadow-soft hover:shadow-hover transition-all duration-300 hover:scale-105 animate-fade-in border border-border/50`}
-              style={{ animationDelay: `${index * 0.05}s` }}
+              className={`${gradientClasses[index % gradientClasses.length]} rounded-2xl p-6 shadow-soft hover:shadow-hover transition-all duration-300 hover:scale-105 border border-border/50`}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                   <GraduationCap className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">{item.class}</h3>
+                <h3 className="text-xl font-bold text-foreground">Class {item.class}</h3>
               </div>
-              
               <div className="space-y-2">
                 {item.subjects.map((subject, subIndex) => (
                   <div
                     key={subIndex}
-                    className="bg-card/60 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-foreground font-medium"
+                    onClick={() => navigate(`/class/${item.class}/${subject}`)}
+                    className="cursor-pointer bg-card/60 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-foreground font-medium hover:bg-primary/10 transition-colors"
                   >
                     {subject}
                   </div>

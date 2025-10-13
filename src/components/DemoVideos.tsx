@@ -21,9 +21,9 @@ const DemoVideos = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Extract YouTube video ID from various URL formats
   const getYouTubeId = (url: string): string | null => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     return match && match[2].length === 11 ? match[2] : null;
   };
@@ -33,74 +33,41 @@ const DemoVideos = () => {
       try {
         setLoading(true);
         setError(null);
-        
-        // Replace this URL with your actual Google Sheets published CSV URL
-        const SHEET_CSV_URL = "YOUR_GOOGLE_SHEET_CSV_URL_HERE";
-        
-        // For demo purposes, using sample data
-        // In production, uncomment the fetch code below and replace with your sheet URL
-        
-        /*
+
+        const SHEET_CSV_URL =
+          "https://docs.google.com/spreadsheets/d/e/2PACX-1vQGKHJwekNxU1khZGcVXAtb8bwRv7SyMwgPcuQuPomdRDAbkDmNunMORkqXQgBLjVEupOtjI70ETFvW/pub?gid=806514435&single=true&output=csv";
+
         const response = await fetch(SHEET_CSV_URL);
         if (!response.ok) {
           throw new Error("Failed to fetch video data");
         }
-        
+
         const csvText = await response.text();
-        const rows = csvText.split('\n');
+        const rows = csvText.split("\n");
         const parsedVideos: Video[] = [];
-        
-        // Skip header row, parse CSV
+
+        // Skip header (row 0), parse the rest
         for (let i = 1; i < rows.length; i++) {
-          const row = rows[i].split(',');
-          if (row.length >= 4 && row[0] && row[1] && row[2] && row[3]) {
-            parsedVideos.push({
-              class: row[0].trim(),
-              subject: row[1].trim(),
-              title: row[2].trim(),
-              youtubeLink: row[3].trim(),
-            });
+          const row = rows[i].split(",");
+          if (row.length >= 4) {
+            const cls = "Class " + row[0].trim();
+            const subj = row[1].trim();
+            const ttl = row[2].trim();
+            const link = row[3].trim();
+            if (cls && subj && ttl && link) {
+              parsedVideos.push({
+                class: cls,
+                subject: subj,
+                title: ttl,
+                youtubeLink: link,
+              });
+            }
           }
         }
-        */
-        
-        // Sample demo data - replace with actual Google Sheets fetch
-        const parsedVideos: Video[] = [
-          {
-            class: "Class 5",
-            subject: "Mathematics",
-            title: "Introduction to Fractions",
-            youtubeLink: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          },
-          {
-            class: "Class 5",
-            subject: "Mathematics",
-            title: "Decimals Made Easy",
-            youtubeLink: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          },
-          {
-            class: "Class 5",
-            subject: "Science",
-            title: "The Solar System",
-            youtubeLink: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          },
-          {
-            class: "Class 8",
-            subject: "Mathematics",
-            title: "Linear Equations",
-            youtubeLink: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          },
-          {
-            class: "Class 8",
-            subject: "Science",
-            title: "Chemical Reactions",
-            youtubeLink: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          },
-        ];
-        
-        // Group videos by class and subject
+
+        // Group by class → subject
         const grouped: GroupedVideos = {};
-        parsedVideos.forEach(video => {
+        parsedVideos.forEach((video) => {
           if (!grouped[video.class]) {
             grouped[video.class] = {};
           }
@@ -109,12 +76,12 @@ const DemoVideos = () => {
           }
           grouped[video.class][video.subject].push(video);
         });
-        
+
         setVideos(grouped);
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching videos:", err);
-        setError("Unable to load videos. Please try again later.");
+        console.error("Error fetching demo videos:", err);
+        setError("Unable to load demo videos. Please try again later.");
         setLoading(false);
         toast({
           title: "Error",
@@ -152,7 +119,7 @@ const DemoVideos = () => {
   return (
     <section id="demo-videos" className="py-16 px-4 md:py-24 bg-muted/30">
       <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-12 md:mb-16 animate-fade-in">
+        <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
             Watch Our Demo Lessons
           </h2>
@@ -174,52 +141,58 @@ const DemoVideos = () => {
         ) : (
           <div className="space-y-12">
             {Object.entries(videos).map(([className, subjects], classIndex) => (
-              <div key={classIndex} className="animate-fade-in" style={{ animationDelay: `${classIndex * 0.1}s` }}>
+              <div
+                key={classIndex}
+                className="animate-fade-in"
+                style={{ animationDelay: `${classIndex * 0.1}s` }}
+              >
                 <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
                   <span className="w-2 h-8 bg-gradient-hero rounded-full" />
                   {className}
                 </h3>
-                
-                {Object.entries(subjects).map(([subject, videoList], subjectIndex) => (
-                  <div key={subjectIndex} className="mb-8">
-                    <h4 className="text-xl font-semibold text-secondary mb-4 ml-5">
-                      {subject}
-                    </h4>
-                    
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 ml-5">
-                      {videoList.map((video, videoIndex) => {
-                        const videoId = getYouTubeId(video.youtubeLink);
-                        return (
-                          <div
-                            key={videoIndex}
-                            className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-hover transition-all duration-300 hover:scale-105"
-                          >
-                            {videoId ? (
-                              <div className="aspect-video">
-                                <iframe
-                                  className="w-full h-full"
-                                  src={`https://www.youtube.com/embed/${videoId}`}
-                                  title={video.title}
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowFullScreen
-                                />
+
+                {Object.entries(subjects).map(
+                  ([subject, videoList], subjectIndex) => (
+                    <div key={subjectIndex} className="mb-8">
+                      <h4 className="text-xl font-semibold text-secondary mb-4 ml-5">
+                        {subject}
+                      </h4>
+
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 ml-5">
+                        {videoList.map((video, videoIndex) => {
+                          const videoId = getYouTubeId(video.youtubeLink);
+                          return (
+                            <div
+                              key={videoIndex}
+                              className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-hover transition-all duration-300 hover:scale-105"
+                            >
+                              {videoId ? (
+                                <div className="aspect-video">
+                                  <iframe
+                                    className="w-full h-full"
+                                    src={`https://www.youtube.com/embed/${videoId}`}
+                                    title={video.title}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                  />
+                                </div>
+                              ) : (
+                                <div className="aspect-video bg-muted flex items-center justify-center">
+                                  <AlertCircle className="h-12 w-12 text-muted-foreground" />
+                                </div>
+                              )}
+                              <div className="p-4">
+                                <h5 className="font-semibold text-foreground line-clamp-2">
+                                  {video.title}
+                                </h5>
                               </div>
-                            ) : (
-                              <div className="aspect-video bg-muted flex items-center justify-center">
-                                <AlertCircle className="h-12 w-12 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="p-4">
-                              <h5 className="font-semibold text-foreground line-clamp-2">
-                                {video.title}
-                              </h5>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             ))}
           </div>
