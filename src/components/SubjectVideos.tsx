@@ -1,8 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, FileText, Video, Loader2 } from "lucide-react";
+import { useInView } from "react-intersection-observer";
 import Papa from "papaparse";
 
+// ---------------- Interfaces ----------------
 interface VideoItem {
   Class: string;
   Subject: string;
@@ -17,13 +19,52 @@ interface PDFItem {
   "PDF Link": string;
 }
 
+// ---------------- Sheet URLs ----------------
 const VIDEOS_SHEET_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQGKHJwekNxU1khZGcVXAtb8bwRv7SyMwgPcuQuPomdRDAbkDmNunMORkqXQgBLjVEupOtjI70ETFvW/pub?gid=0&single=true&output=csv"  
-//"https://docs.google.com/spreadsheets/d/e/2PACX-1vQGKHJwekNxU1khZGcVXAtb8bwRv7SyMwgPcuQuPomdRDAbkDmNunMORkqXQgBLjVEupOtjI70ETFvW/pub?output=csv";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQGKHJwekNxU1khZGcVXAtb8bwRv7SyMwgPcuQuPomdRDAbkDmNunMORkqXQgBLjVEupOtjI70ETFvW/pub?gid=0&single=true&output=csv";
 
 const PDFS_SHEET_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQGKHJwekNxU1khZGcVXAtb8bwRv7SyMwgPcuQuPomdRDAbkDmNunMORkqXQgBLjVEupOtjI70ETFvW/pub?gid=1140373478&single=true&output=csv"; // replace this with your PDFs sheet CSV link
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQGKHJwekNxU1khZGcVXAtb8bwRv7SyMwgPcuQuPomdRDAbkDmNunMORkqXQgBLjVEupOtjI70ETFvW/pub?gid=1140373478&single=true&output=csv";
 
+// ---------------- Lazy PDF Card ----------------
+const LazyPDFCard = ({ title, pdfLink }: { title: string; pdfLink: string }) => {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.15,
+  });
+
+  const match = pdfLink.match(/\/d\/(.+?)\//);
+  const fileId = match ? match[1] : "";
+  const previewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+
+  return (
+    <div
+      ref={ref}
+      className="relative bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all overflow-hidden max-h-[350px] max-w-[300px]"
+    >
+      <div className="px-3 pt-3">
+        <h4 className="font-semibold text-base line-clamp-1 text-center">{title}</h4>
+      </div>
+
+      <div className="relative aspect-[4/4] mt-2 bg-muted rounded-md overflow-hidden">
+        {inView ? (
+          <iframe
+            src={previewUrl}
+            title={title}
+            className="w-full h-full border-0 transition-all duration-500 ease-in-out"
+          ></iframe>
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground text-sm">
+            <Loader2 className="h-5 w-5 animate-spin mb-2 text-primary" />
+            Loading preview...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ---------------- Main Component ----------------
 const SubjectVideos = () => {
   const { className, subjectName } = useParams();
   const navigate = useNavigate();
@@ -51,7 +92,7 @@ const SubjectVideos = () => {
         const parsedVideos = Papa.parse(videoText, { header: true }).data as VideoItem[];
         const parsedPdfs = Papa.parse(pdfText, { header: true }).data as PDFItem[];
 
-        // filter and reverse (latest last → first)
+        // Filter & reverse (latest → first)
         const filteredVideos = parsedVideos
           .filter(
             (v) =>
@@ -80,12 +121,7 @@ const SubjectVideos = () => {
     fetchData();
   }, [className, subjectName]);
 
-  const getEmbedLink = (url: string) => {
-    if (!url) return "";
-    const match = url.match(/\/d\/(.+?)\//);
-    return match ? `https://drive.google.com/file/d/${match[1]}/preview` : url;
-  };
-
+  // ---------------- Render ----------------
   return (
     <section className="py-10 px-4 md:py-16 bg-background min-h-screen">
       <div className="container mx-auto max-w-5xl">
@@ -129,63 +165,15 @@ const SubjectVideos = () => {
                   {pdfs.length === 0 ? (
                     <p className="text-muted-foreground">No PDFs found.</p>
                   ) : (
-                    <div className="grid md:grid-cols-3 gap-2">
-                      {pdfs.map((p, i) => {
-                        const match = p["PDF Link"].match(/\/d\/(.+?)\//);
-                        const fileId = match ? match[1] : "";
-                        const previewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-
-                        return (
-                          <div
-                            key={i}
-                            className="relative bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all overflow-hidden max-h-[350px] max-w-[300px]"
-                          >
-                            {/* Header / title */}
-                            <div className="px-4 pt-3">
-                              <h4 className="font-semibold text-lg line-clamp-1">
-                                {p.Title}
-                              </h4>
-                            </div>
-
-                            {/* Thumbnail (using Drive preview iframe) */}
-                            <div className="relative aspect-[4/4] mt-2 bg-muted rounded-md overflow-hidden">
-                              <iframe
-                                src={previewUrl}
-                                title={p.Title}
-                                className="w-full h-full"
-                              ></iframe>
-
-                              {/* Overlay buttons */}
-                              {/* <div className="absolute top-2 right-2 flex gap-2">
-                                <a
-                                  href={p["PDF Link"]}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  title="View PDF"
-                                  className="p-2 rounded-full bg-white/80 hover:bg-white shadow transition"
-                                >
-                                  <Eye className="h-4 w-4 text-gray-700" />
-                                </a>
-                                <a
-                                  href={p["PDF Link"]}
-                                  download
-                                  title="Download PDF"
-                                  className="p-2 rounded-full bg-white/80 hover:bg-white shadow transition"
-                                >
-                                  <Download className="h-4 w-4 text-gray-700" />
-                                </a>
-                              </div> */}
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="grid md:grid-cols-3 gap-4 place-items-center">
+                      {pdfs.map((p, i) => (
+                        <LazyPDFCard key={i} title={p.Title} pdfLink={p["PDF Link"]} />
+                      ))}
                     </div>
                   )}
                 </div>
               )}
             </div>
-
-
 
             {/* 🎥 Videos Section */}
             <div className="bg-card rounded-xl shadow-soft border border-border overflow-hidden">
@@ -198,9 +186,9 @@ const SubjectVideos = () => {
                   Video Lessons
                 </h3>
                 {showVideos ? (
-                  <ChevronDown className="h-6 w-6 text-muted-foreground" />
+                  <ChevronDown className="h-6 w-6 text-muted-foreground transition-transform duration-300 rotate-180" />
                 ) : (
-                  <ChevronRight className="h-6 w-6 text-muted-foreground" />
+                  <ChevronRight className="h-6 w-6 text-muted-foreground transition-transform duration-300" />
                 )}
               </div>
 
